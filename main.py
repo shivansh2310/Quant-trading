@@ -46,7 +46,7 @@ def get_history(ticker, period_start, period_end, granularity="1d", tries=0):
     if df.empty:
         return pd.DataFrame()
     
-    df["datetime"] = df["datetime"].dt.tz_convert('UTC')
+    df["datetime"] = df["datetime"].dt.tz_convert('UTC') 
     df = df.drop(columns=["Dividends", "Stock Splits"])
     df = df.set_index("datetime", drop=True)
     return df
@@ -88,8 +88,10 @@ def get_ticker_dfs(start, end):
         save_pickle("dataset.obj", (tickers, ticker_dfs))
     return tickers, ticker_dfs
 
-# tzinfo to localize time to current time zone
+from utils import Alpha
+
 period_start = datetime(2010,1,1, tzinfo=pytz.UTC)
 period_end = datetime.now(pytz.utc)
 tickers, ticker_dfs = get_ticker_dfs(start=period_start, end=period_end)
-print(ticker_dfs)
+alpha = Alpha(insts=tickers,dfs=ticker_dfs,start=period_start, end=period_end)
+alpha.run_simulation()
