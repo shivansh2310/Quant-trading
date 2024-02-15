@@ -89,7 +89,7 @@ def get_ticker_dfs(start, end):
     return tickers, ticker_dfs
 
 from utils import Alpha
-
+from utils import save_pickle, load_pickle
 period_start = datetime(2010,1,1, tzinfo=pytz.UTC)
 period_end = datetime.now(pytz.utc)
 tickers, ticker_dfs = get_ticker_dfs(start=period_start, end=period_end)
@@ -102,7 +102,7 @@ from alpha3 import Alpha3
 
 
 
-alpha1 = Alpha3(insts=tickers,dfs=ticker_dfs,start=period_start, end=period_end)
+alpha1 = Alpha1(insts=tickers,dfs=ticker_dfs,start=period_start, end=period_end)
 alpha2 = Alpha2(insts=tickers,dfs=ticker_dfs,start=period_start, end=period_end)
 alpha3 = Alpha3(insts=tickers,dfs=ticker_dfs,start=period_start, end=period_end)
 
@@ -111,3 +111,25 @@ df1 = alpha1.run_simulation()
 df2 = alpha2.run_simulation()
 df3 = alpha3.run_simulation()
 
+df1,df2,df3 = load_pickle("simulations.obj")
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.plot(df1.capital)
+plt.plot(df2.capital)
+plt.plot(df3.capital)
+plt.show()
+plt.close()
+
+nzr = lambda df: df.capital_ret.loc[df.capital_ret != 0].fillna(0)
+def plot_vol(r):
+    vol = r.rolling(25).std() * np.sqrt(253)
+    plt.plot(vol)
+    plt.show()
+    plt.close()
+
+plot_vol(nzr(df1))
+plot_vol(nzr(df2))
+plot_vol(nzr(df3))
+print(nzr(df1).std()*np.sqrt(253),nzr(df3).std()*np.sqrt(253),nzr(df3).std()*np.sqrt(253))
